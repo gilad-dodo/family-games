@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>משחק פנטומימה</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            direction: rtl;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0; /* צבע רקע פשוט */
+            color: black;
+        }
+        #sentence {
+            font-size: 30px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            opacity: 1;
+            transition: opacity 0.5s ease-in-out;
+        }
+        #timerText {
+            font-size: 20px;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        button {
+            font-size: 18px;
+            padding: 10px 20px;
+            cursor: pointer;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            margin: 10px;
+        }
+        .new-sentence-btn {
+            background-color: #4CAF50;
+        }
+        .start-timer-btn {
+            background-color: #007BFF;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="sentence">לחץ על הכפתור כדי לראות משפט!</div>
+    <button class="new-sentence-btn" onclick="generateSentence()">משפט חדש</button>
+
+    <p id="timerText">יש לכם זמן להסביר את המשפט. אתם מוכנים? לחצו על הכפתור ותתחילו!</p>
+    <button class="start-timer-btn" onclick="toggleTimer()">התחל טיימר</button>
+
+    <p id="timerDisplay"></p>
+
+    <!-- צליל סיום -->
+    <audio id="endSound" src="https://www.fesliyanstudios.com/play-mp3/4380"></audio>
+
+    <script>
+        const subjects = ["החתול", "הכלב", "הפיל", "העכבר", "התינוק", "השולחן", "הבלון", "הדלת", "הענן", "השמש", "הדוב", "הקוף", "העוגה", "הפרפר", "הג’ירפה"];
+        const verbs = ["רוקד", "עף", "נובח", "מצייר", "צוחק", "ישן", "שוחה", "קופץ", "מנגן", "רץ", "מתגלגל", "מחייך", "מתנדנד", "שותה", "מתחבא"];
+        const objects = ["על הבננה", "בתוך המטריה", "עם הכובע", "על הגלשן", "ליד הרמקול", "מתחת למגבת", "עם השוקולד", "על הפיצה", "בתוך האוטו", "ליד הרמזור", "על קוביית הקרח", "מול המראה", "בתוך הטלוויזיה", "ליד הנחש", "בתוך הצלחת"];
+
+        let timerRunning = false;
+        let timerDuration = 0; // משתנה למעקב אחר זמן הטיימר
+        let timer;
+
+        function generateSentence() {
+            const sentenceElement = document.getElementById("sentence");
+            sentenceElement.style.opacity = 0; // אפקט היעלמות
+
+            setTimeout(() => {
+                let sentence = subjects[Math.floor(Math.random() * subjects.length)] + " " +
+                               verbs[Math.floor(Math.random() * verbs.length)];
+
+                if (Math.random() > 0.4) { // בערך 60% מהמשפטים יהיו עם מושא
+                    sentence += " " + objects[Math.floor(Math.random() * objects.length)];
+                }
+
+                // קביעת זמן הטיימר לפי מספר המילים במשפט
+                let wordCount = sentence.split(" ").length;
+                if (wordCount === 2) {
+                    timerDuration = 90; // 1.5 דקות
+                } else if (wordCount === 3) {
+                    timerDuration = 120; // 2 דקות
+                } else {
+                    timerDuration = 150; // 2.5 דקות
+                }
+
+                sentenceElement.textContent = sentence;
+                sentenceElement.style.opacity = 1; // אפקט הופעה
+            }, 500);
+        }
+
+        function toggleTimer() {
+            if (timerRunning) {
+                // אם הטיימר כבר רץ, אפס אותו
+                clearInterval(timer);
+                document.getElementById("timerDisplay").textContent = "הטיימר הופסק";
+                timerRunning = false;
+            } else {
+                // אם הטיימר לא רץ, התחל אותו
+                startTimer();
+            }
+        }
+
+        function startTimer() {
+            timerRunning = true;
+            let timeLeft = timerDuration;
+            document.getElementById("timerDisplay").textContent = `נותרו ${Math.floor(timeLeft / 60)}:${(timeLeft % 60).toString().padStart(2, '0')} דקות`;
+
+            timer = setInterval(() => {
+                timeLeft--;
+                let minutes = Math.floor(timeLeft / 60);
+                let seconds = timeLeft % 60;
+                document.getElementById("timerDisplay").textContent = `נותרו ${minutes}:${seconds.toString().padStart(2, '0')} דקות`;
+
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    document.getElementById("timerDisplay").textContent = "הזמן נגמר!";
+                    playSound();
+                    timerRunning = false;
+                }
+            }, 1000);
+        }
+
+        function playSound() {
+            document.getElementById("endSound").play();
+        }
+    </script>
+
+</body>
+</html>
